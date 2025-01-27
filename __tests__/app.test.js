@@ -4,7 +4,6 @@ const app = require("../app.js");
 const request = require("supertest");
 const seed = require("../db/seeds/seed.js");
 const db = require("../db/connection.js");
-const devData = require("../db/data/development-data/index.js");
 const testData = require("../db/data/test-data/index.js");
 
 /* Set up your beforeEach & afterAll functions here */
@@ -28,6 +27,24 @@ describe("GET /api", () => {
       .expect(200)
       .then(({ body: { endpoints } }) => {
         expect(endpoints).toEqual(endpointsJson);
+      });
+  });
+});
+
+describe("GET /api/topics", () => {
+  test("should respond with an array of three topics, with value parameters typeof string", () => {
+    return request(app)
+      .get("/api/topics")
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+
+        expect(body.topics.length).toBe(3);
+
+        body.topics.forEach((topic) => {
+          expect(typeof topic.description).toBe("string");
+          expect(typeof topic.slug).toBe("string");
+        });
       });
   });
 });
