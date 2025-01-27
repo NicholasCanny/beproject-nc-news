@@ -104,3 +104,21 @@ describe("GET /api/articles/:article_id", () => {
       });
   });
 });
+
+// describe("GET /api/articles", () => {
+//   test("should respond with an array of three topics, with value parameters typeof string", () => {
+//     return request(app)
+//       .get("/api/articles")
+//       .expect(200)
+//       .then((response) => {
+//         const body = response.body;
+
+//         expect(body.topics.length).toBe(3);
+
+//         body.topics.forEach((topic) => {
+//           expect(typeof topic.description).toBe("string");
+//           expect(typeof topic.slug).toBe("string");
+//         });
+//       });
+//   });
+// });

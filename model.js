@@ -20,4 +20,10 @@ const fetchArticleByArticleID = (id) => {
     });
 };
 
-module.exports = { fetchTopics, fetchArticleByArticleID };
+const fetchArticles = () => {
+  return db.query(`SELECT * FROM articles`).then(({ rows }) => {
+    return rows;
+  });
+};
+
+module.exports = { fetchTopics, fetchArticleByArticleID, fetchArticles };

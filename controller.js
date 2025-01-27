@@ -21,4 +21,14 @@ const getArticleByArticleId = (request, response, next) => {
     });
 };
 
-module.exports = { getTopics, getArticleByArticleId };
+const getArticles = (request, response, next) => {
+  fetchArticles()
+    .then((articles) => {
+      response.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+module.exports = { getTopics, getArticleByArticleId, getArticles };
