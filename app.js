@@ -3,7 +3,11 @@ const app = express();
 const endpoints = require("./endpoints.json");
 // imported endpoints.json
 
-const { getTopics, getArticleByArticleId } = require("./controller");
+const {
+  getTopics,
+  getArticleByArticleId,
+  getArticles,
+} = require("./controller");
 
 app.get("/api", (req, res) => {
   res.status(200).send({ endpoints: endpoints });
@@ -12,6 +16,8 @@ app.get("/api", (req, res) => {
 app.get("/api/topics", getTopics);
 
 app.get("/api/articles/:article_id", getArticleByArticleId);
+
+app.get("/api/articles", getArticles);
 
 // error handling middleware
 
