@@ -6,4 +6,18 @@ const fetchTopics = () => {
   });
 };
 
-module.exports = fetchTopics;
+const fetchArticleByArticleID = (id) => {
+  return db
+    .query(`SELECT * FROM articles WHERE article_id=$1`, [id]) // subsitution - $1 == first element in the array
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        // no results = thats an error
+        return Promise.reject({ message: "article not found" });
+      } else {
+        // results = no error
+        return rows[0];
+      }
+    });
+};
+
+module.exports = { fetchTopics, fetchArticleByArticleID };
