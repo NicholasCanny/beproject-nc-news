@@ -5,6 +5,7 @@ const request = require("supertest");
 const seed = require("../db/seeds/seed.js");
 const db = require("../db/connection.js");
 const testData = require("../db/data/test-data/index.js");
+require("jest-sorted");
 
 /* Set up your beforeEach & afterAll functions here */
 
@@ -72,6 +73,7 @@ describe("GET /api/articles/:article_id", () => {
         const article = body.article;
 
         expect(article).toMatchObject({
+          article_id: 1,
           title: "Living in the shadow of a great man",
           topic: "mitch",
           author: "butter_bridge",
@@ -102,5 +104,33 @@ describe("GET /api/articles/:article_id", () => {
           error: "Bad Request",
         });
       });
+  });
+
+  describe("GET /api/articles", () => {
+    test("should respond with an array of articles with no body property", () => {
+      return request(app)
+        .get("/api/articles")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          console.log(body);
+
+          expect(body.articles.length).toBe(13);
+
+          expect(body.articles).toBeSortedBy("created_at", {
+            descending: true,
+          });
+
+          body.articles.forEach((article) => {
+            expect(typeof article.title).toBe("string");
+            expect(typeof article.topic).toBe("string");
+            expect(typeof article.author).toBe("string");
+            expect(typeof article.body).toBe("undefined");
+            expect(typeof article.created_at).toBe("string");
+            expect(typeof article.votes).toBe("number");
+            expect(typeof article.article_img_url).toBe("string");
+          });
+        });
+    });
   });
 });

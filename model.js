@@ -8,16 +8,24 @@ const fetchTopics = () => {
 
 const fetchArticleByArticleID = (id) => {
   return db
-    .query(`SELECT * FROM articles WHERE article_id=$1`, [id]) // subsitution - $1 == first element in the array
-    .then(({ rows }) => {
-      if (rows.length === 0) {
-        // no results = thats an error
+    .query(`SELECT * FROM articles WHERE article_id=$1`, [id])
+    .then(({ rows, rowCount }) => {
+      if (rowCount === 0) {
         return Promise.reject({ message: "article not found" });
       } else {
-        // results = no error
         return rows[0];
       }
     });
 };
 
-module.exports = { fetchTopics, fetchArticleByArticleID };
+const fetchArticles = () => {
+  return db
+    .query(
+      `SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles ORDER BY created_at DESC`
+    )
+    .then(({ rows }) => {
+      return rows;
+    });
+};
+
+module.exports = { fetchTopics, fetchArticleByArticleID, fetchArticles };
