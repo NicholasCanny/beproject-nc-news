@@ -242,4 +242,64 @@ describe("GET /api/articles/:article_id", () => {
         expect(response.body).toEqual({ error: "Bad Request" });
       });
   });
+  describe("PATCH /api/articles/:article_id", () => {
+    test("should respond with a changed article selected by article ID", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: 1 })
+        .expect(201)
+        .then((response) => {
+          const ArticleChange = response.body.articleChange;
+          console.log(ArticleChange);
+          expect(ArticleChange).toMatchObject({
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 101,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    test("should respond with a changed article selected by article ID, only this time subtract the vote", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: -80 })
+        .expect(201)
+        .then((response) => {
+          const ArticleChange = response.body.articleChange;
+          console.log(ArticleChange);
+          expect(ArticleChange).toMatchObject({
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 20,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    test("should get a 404 as article ID doesn't exist", () => {
+      return request(app)
+        .patch("/api/articles/100")
+        .send({ inc_votes: -80 })
+        .expect(404)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "article ID not found" });
+        });
+    });
+    test("should get a 404 as article ID doesn't exist", () => {
+      return request(app)
+        .patch("/api/articles/banana")
+        .send({ inc_votes: -80 })
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "Bad Request" });
+        });
+    });
+  });
 });

@@ -76,10 +76,27 @@ const addComment = (newComment, id) => {
   });
 };
 
+const changeArticle = (newVote, id) => {
+  console.log(newVote);
+  console.log(id);
+
+  return checkCategoryExists(id).then(() => {
+    return db
+      .query(
+        `UPDATE articles SET votes = votes + $1 WHERE article_id = $2  RETURNING *`,
+        [newVote, id]
+      )
+      .then(({ rows }) => {
+        return rows[0];
+      });
+  });
+};
+
 module.exports = {
   fetchTopics,
   fetchArticleByArticleID,
   fetchArticles,
   fetchCommentsByArticleId,
   addComment,
+  changeArticle,
 };
