@@ -1,4 +1,5 @@
 const db = require("./db/connection");
+const { checkCategoryExists } = require("./db/seeds/utils");
 
 const fetchTopics = () => {
   return db.query(`SELECT * FROM topics`).then(({ rows }) => {
@@ -24,8 +25,45 @@ const fetchArticles = () => {
       `SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles ORDER BY created_at DESC`
     )
     .then(({ rows }) => {
-      return rows;
+      if (rows.length === 0) {
+        return Promise.reject({ message: "Route not found" });
+      } else {
+        return rows;
+      }
     });
 };
 
-module.exports = { fetchTopics, fetchArticleByArticleID, fetchArticles };
+// const fetchCommentsByArticleId = (id) => {
+//   return db
+//     .query(
+//       `SELECT * FROM comments WHERE article_id=$1 ORDER BY created_at DESC`,
+//       [id]
+//     )
+//     .then(({ rows, rowCount }) => {
+//       if (rowCount === 0) {
+//         return Promise.reject({ message: "comments not found" });
+//       } else {
+//         return rows;
+//       }
+//     });
+// };
+
+const fetchCommentsByArticleId = (id) => {
+  return checkCategoryExists(id).then(() => {
+    return db
+      .query(
+        `SELECT * FROM comments WHERE article_id=$1 ORDER BY created_at DESC`,
+        [id]
+      )
+      .then(({ rows }) => {
+        return rows;
+      });
+  });
+};
+
+module.exports = {
+  fetchTopics,
+  fetchArticleByArticleID,
+  fetchArticles,
+  fetchCommentsByArticleId,
+};

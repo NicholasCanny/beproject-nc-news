@@ -5,6 +5,7 @@ const request = require("supertest");
 const seed = require("../db/seeds/seed.js");
 const db = require("../db/connection.js");
 const testData = require("../db/data/test-data/index.js");
+const { checkCategoryExists } = require("../db/seeds/utils");
 require("jest-sorted");
 
 /* Set up your beforeEach & afterAll functions here */
@@ -113,7 +114,6 @@ describe("GET /api/articles/:article_id", () => {
         .expect(200)
         .then((response) => {
           const body = response.body;
-          console.log(body);
 
           expect(body.articles.length).toBe(13);
 
@@ -131,6 +131,68 @@ describe("GET /api/articles/:article_id", () => {
             expect(typeof article.article_img_url).toBe("string");
           });
         });
+    });
+  });
+
+  describe("GET /api/articles/:article_id/comments", () => {
+    test("should respond with sorted comments selected by article ID and including comment ID", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          const comments = body.comments;
+
+          expect(comments).toBeSortedBy("created_at", {
+            descending: true,
+          });
+
+          comments.forEach((comment) => {
+            expect(comment).toMatchObject({
+              body: expect.any(String),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              article_id: 1,
+              comment_id: expect.any(Number),
+              created_at: expect.any(String),
+            });
+          });
+        });
+    });
+
+    test("should respond with an error message if article ID doesn't exist", () => {
+      return request(app)
+        .get("/api/articles/100/comments")
+        .expect(404)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "article ID not found" });
+        });
+    });
+
+    test("should respond with bad request if invalid type inputted for ID", () => {
+      return request(app)
+        .get("/api/articles/pug/comments")
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "Bad Request" });
+        });
+    });
+    test("should respond with 200 and empty array of comments if the article ID exists but there are no comments for that article", () => {
+      return request(app)
+        .get("/api/articles/4/comments")
+        .expect(200)
+        .then((response) => {
+          expect(response.body).toEqual({ comments: [] });
+        });
+    });
+    test("should resolve if article Id exists ", () => {
+      return expect(checkCategoryExists(1)).resolves.toBe("article exists");
+    });
+  });
+  test("should reject if category ID doesn't exist", () => {
+    return expect(checkCategoryExists(100)).rejects.toMatchObject({
+      status: 404,
+      message: "article ID not found",
     });
   });
 });

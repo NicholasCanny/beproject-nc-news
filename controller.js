@@ -2,6 +2,7 @@ const {
   fetchTopics,
   fetchArticleByArticleID,
   fetchArticles,
+  fetchCommentsByArticleId,
 } = require("./model");
 
 const getTopics = (request, response, next) => {
@@ -35,4 +36,20 @@ const getArticles = (request, response, next) => {
     });
 };
 
-module.exports = { getTopics, getArticleByArticleId, getArticles };
+const getCommentsByArticleId = (request, response, next) => {
+  const { article_id, comment_id } = request.params;
+  fetchCommentsByArticleId(article_id)
+    .then((comments) => {
+      response.status(200).send({ comments, comment_id });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+module.exports = {
+  getTopics,
+  getArticleByArticleId,
+  getArticles,
+  getCommentsByArticleId,
+};
