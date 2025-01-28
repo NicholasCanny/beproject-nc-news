@@ -113,7 +113,6 @@ describe("GET /api/articles/:article_id", () => {
         .expect(200)
         .then((response) => {
           const body = response.body;
-          console.log(body);
 
           expect(body.articles.length).toBe(13);
 
@@ -130,6 +129,51 @@ describe("GET /api/articles/:article_id", () => {
             expect(typeof article.votes).toBe("number");
             expect(typeof article.article_img_url).toBe("string");
           });
+        });
+    });
+  });
+
+  describe("GET /api/articles/:article_id/comments", () => {
+    test("should respond with sorted comments selected by article ID and including comment ID", () => {
+      return request(app)
+        .get("/api/articles/1/comments")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          const comments = body.comments;
+
+          expect(comments).toBeSortedBy("created_at", {
+            descending: true,
+          });
+
+          comments.forEach((comment) => {
+            expect(comment).toMatchObject({
+              body: expect.any(String),
+              votes: expect.any(Number),
+              author: expect.any(String),
+              article_id: 1,
+              comment_id: expect.any(Number),
+              created_at: expect.any(String),
+            });
+          });
+        });
+    });
+
+    test("should respond with an error message if article ID doesn't exist", () => {
+      return request(app)
+        .get("/api/articles/100/comments")
+        .expect(404)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "comments not found" });
+        });
+    });
+
+    test("should respond with bad request if invalid type inputted for ID", () => {
+      return request(app)
+        .get("/api/articles/pug/comments")
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "Bad Request" });
         });
     });
   });

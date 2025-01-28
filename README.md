@@ -10,9 +10,6 @@ Install dependencies:
 NODE
 PSQL
 npm install
-npm install express
-npm install --save-dev supertest
-npm install --save-dev jest-sorted
 
 Create a file named .env.development and add the following line:
 PGDATABASE=nc_news
