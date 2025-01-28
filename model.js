@@ -1,4 +1,5 @@
 const db = require("./db/connection");
+const { checkCategoryExists } = require("./db/seeds/utils");
 
 const fetchTopics = () => {
   return db.query(`SELECT * FROM topics`).then(({ rows }) => {
@@ -32,19 +33,32 @@ const fetchArticles = () => {
     });
 };
 
+// const fetchCommentsByArticleId = (id) => {
+//   return db
+//     .query(
+//       `SELECT * FROM comments WHERE article_id=$1 ORDER BY created_at DESC`,
+//       [id]
+//     )
+//     .then(({ rows, rowCount }) => {
+//       if (rowCount === 0) {
+//         return Promise.reject({ message: "comments not found" });
+//       } else {
+//         return rows;
+//       }
+//     });
+// };
+
 const fetchCommentsByArticleId = (id) => {
-  return db
-    .query(
-      `SELECT * FROM comments WHERE article_id=$1 ORDER BY created_at DESC`,
-      [id]
-    )
-    .then(({ rows, rowCount }) => {
-      if (rowCount === 0) {
-        return Promise.reject({ message: "comments not found" });
-      } else {
+  return checkCategoryExists(id).then(() => {
+    return db
+      .query(
+        `SELECT * FROM comments WHERE article_id=$1 ORDER BY created_at DESC`,
+        [id]
+      )
+      .then(({ rows }) => {
         return rows;
-      }
-    });
+      });
+  });
 };
 
 module.exports = {
