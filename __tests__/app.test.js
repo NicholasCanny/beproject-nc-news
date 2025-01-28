@@ -195,4 +195,51 @@ describe("GET /api/articles/:article_id", () => {
       message: "article ID not found",
     });
   });
+
+  describe("POST /api/articles/:article_id/comments", () => {
+    test("should respond with a posted comment to specific article ID", () => {
+      return request(app)
+        .post("/api/articles/1/comments")
+        .send({
+          username: "lurker",
+          body: "pugs not drugs",
+        })
+        .expect(201)
+        .then((response) => {
+          const postedComment = response.body.comment;
+          expect(postedComment).toMatchObject({
+            comment_id: expect.any(Number),
+            body: "pugs not drugs",
+            article_id: 1,
+            author: "lurker",
+            votes: 0,
+            created_at: expect.any(String),
+          });
+        });
+    });
+    test("should respond with a posted comment to specific article ID", () => {
+      return request(app)
+        .post("/api/articles/100/comments")
+        .send({
+          username: "lurker",
+          body: "pugs not drugs",
+        })
+        .expect(404)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "article ID not found" });
+        });
+    });
+  });
+  test("should respond with a posted comment to specific article ID", () => {
+    return request(app)
+      .post("/api/articles/pug/comments")
+      .send({
+        username: "lurker",
+        body: "pugs not drugs",
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body).toEqual({ error: "Bad Request" });
+      });
+  });
 });

@@ -8,7 +8,10 @@ const {
   getArticleByArticleId,
   getArticles,
   getCommentsByArticleId,
+  postComment,
 } = require("./controller");
+
+app.use(express.json());
 
 app.get("/api", (req, res) => {
   res.status(200).send({ endpoints: endpoints });
@@ -22,9 +25,10 @@ app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
+app.post("/api/articles/:article_id/comments", postComment);
+
 // error handling middleware
 
-// General error-handling middleware
 app.use((err, req, res, next) => {
   if (err.code === "22P02" || err.code === "23502") {
     res.status(400).send({ error: "Bad Request" });
