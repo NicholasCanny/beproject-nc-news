@@ -5,6 +5,7 @@ const request = require("supertest");
 const seed = require("../db/seeds/seed.js");
 const db = require("../db/connection.js");
 const testData = require("../db/data/test-data/index.js");
+require("jest-sorted");
 
 /* Set up your beforeEach & afterAll functions here */
 
@@ -106,7 +107,7 @@ describe("GET /api/articles/:article_id", () => {
   });
 
   describe("GET /api/articles", () => {
-    test("should respond with an array of articles", () => {
+    test("should respond with an array of articles with no body property", () => {
       return request(app)
         .get("/api/articles")
         .expect(200)
@@ -116,7 +117,9 @@ describe("GET /api/articles/:article_id", () => {
 
           expect(body.articles.length).toBe(13);
 
-          expect(body.articles).toBeSortedBy("created_at");
+          expect(body.articles).toBeSortedBy("created_at", {
+            descending: true,
+          });
 
           body.articles.forEach((article) => {
             expect(typeof article.title).toBe("string");
