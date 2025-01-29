@@ -99,7 +99,7 @@ const fetchArticlesWithQuery = (sort_by, order, validColumnNamesToSortBy) => {
   const args = [];
 
   // I tried passing sort_by and query as default arguments e.g. sort_by="created_at",
-  // but I couldn't override these for some reason, so did these if statements instead.
+  // but I couldn't override these for some reason, so I did the following if statements instead.
 
   if (!sort_by) {
     sort_by = "created_at";
@@ -125,12 +125,7 @@ const fetchArticlesWithQuery = (sort_by, order, validColumnNamesToSortBy) => {
     }
   }
 
-  console.log(SQLString, "<<<<<<< Thats my query");
-
   return db.query(SQLString).then(({ rows }) => {
-    // if (rows.length === 0) {
-    //   return Promise.reject({ message: "Route not found" });
-    // } else {
     return rows;
   });
 };

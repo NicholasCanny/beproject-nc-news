@@ -113,7 +113,7 @@ const getArticlesWithQuery = (request, response, next) => {
     "title",
     "topic",
     "author",
-    // "body",
+    "body",
     "created_at",
     "votes",
     "article_img_url",

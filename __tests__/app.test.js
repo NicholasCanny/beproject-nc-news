@@ -388,7 +388,7 @@ describe("GET /api/articles/:article_id", () => {
   });
 
   describe("GET /api/articles (sorting queries)", () => {
-    test("should be able to order articles by title", () => {
+    test("should return 13 articles ordered by title in ascending order", () => {
       return request(app)
         .get("/api/articles?sort_by=article_id&order=asc")
         .expect(200)
@@ -405,21 +405,33 @@ describe("GET /api/articles/:article_id", () => {
         .expect(400)
         .then((response) => {
           const body = response.body;
-          console.log(body);
+
           expect(body).toEqual({
             error: "Bad Request",
           });
         });
     });
-    test.only("should respond with 400 when invalid order query", () => {
+    test("should respond with 400 when invalid order query", () => {
       return request(app)
         .get("/api/articles?sort_by=created_at&order=up")
         .expect(400)
         .then((response) => {
           const body = response.body;
-          console.log(body);
+
           expect(body).toEqual({
             error: "Bad Request",
+          });
+        });
+    });
+    test("should respond with 400 when invalid order query", () => {
+      return request(app)
+        .get("/api/cat?sort_by=created_at&order=asc")
+        .expect(404)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "Route not found",
           });
         });
     });
