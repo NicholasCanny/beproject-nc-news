@@ -12,6 +12,7 @@ const {
   updateArticle,
   deleteCommentByID,
   getUsers,
+  getArticlesWithQuery,
 } = require("./controller");
 
 app.use(express.json());
@@ -24,7 +25,7 @@ app.get("/api/topics", getTopics);
 
 app.get("/api/articles/:article_id", getArticleByArticleId);
 
-app.get("/api/articles", getArticles);
+// app.get("/api/articles", getArticles);
 
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 
@@ -35,6 +36,8 @@ app.patch("/api/articles/:article_id", updateArticle);
 app.delete("/api/comments/:comment_id", deleteCommentByID);
 
 app.get("/api/users", getUsers);
+
+app.get("/api/articles", getArticlesWithQuery);
 
 // error handling middleware
 

@@ -269,9 +269,9 @@ describe("GET /api/articles/:article_id", () => {
         .send({ inc_votes: -80 })
         .expect(201)
         .then((response) => {
-          const ArticleChange = response.body.articleChange;
+          const { articleChange } = response.body;
 
-          expect(ArticleChange).toMatchObject({
+          expect(articleChange).toMatchObject({
             title: "Living in the shadow of a great man",
             topic: "mitch",
             author: "butter_bridge",
@@ -292,10 +292,39 @@ describe("GET /api/articles/:article_id", () => {
           expect(response.body).toEqual({ error: "article ID not found" });
         });
     });
-    test("should get a 404 as article ID doesn't exist", () => {
+    test("should get a 400 when passed invalid input", () => {
       return request(app)
         .patch("/api/articles/banana")
         .send({ inc_votes: -80 })
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "Bad Request" });
+        });
+    });
+    test("should get a 201 and still pass when accidentally passed string as input", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({ inc_votes: "-20" })
+        .expect(201)
+        .then((response) => {
+          const { articleChange } = response.body;
+
+          expect(articleChange).toMatchObject({
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 80,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    test("should get a 400 when no input", () => {
+      return request(app)
+        .patch("/api/articles/1")
+        .send({})
         .expect(400)
         .then((response) => {
           expect(response.body).toEqual({ error: "Bad Request" });
@@ -317,6 +346,14 @@ describe("GET /api/articles/:article_id", () => {
         .expect(404)
         .then((response) => {
           expect(response.body).toEqual({ error: "comment not found" });
+        });
+    });
+    test("should respond with a 400 when invalid input, and return message comment not found", () => {
+      return request(app)
+        .delete("/api/comments/meow")
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "Bad Request" });
         });
     });
   });
@@ -344,6 +381,56 @@ describe("GET /api/articles/:article_id", () => {
         .expect(404)
         .then((response) => {
           expect(response.body).toEqual({
+            error: "Route not found",
+          });
+        });
+    });
+  });
+
+  describe("GET /api/articles (sorting queries)", () => {
+    test("should return 13 articles ordered by title in ascending order", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&order=asc")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          expect(body.articles.length).toBe(13);
+
+          expect(body.articles).toBeSortedBy("article_id", { ascending: true });
+        });
+    });
+    test("should respond with 400 when invalid sort_by query", () => {
+      return request(app)
+        .get("/api/articles?sort_by=something&order=asc")
+        .expect(400)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "Bad Request",
+          });
+        });
+    });
+    test("should respond with 400 when invalid order query", () => {
+      return request(app)
+        .get("/api/articles?sort_by=created_at&order=up")
+        .expect(400)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "Bad Request",
+          });
+        });
+    });
+    test("should respond with 400 when invalid order query", () => {
+      return request(app)
+        .get("/api/cat?sort_by=created_at&order=asc")
+        .expect(404)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
             error: "Route not found",
           });
         });
