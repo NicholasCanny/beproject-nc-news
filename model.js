@@ -94,7 +94,12 @@ const fetchUsers = () => {
   });
 };
 
-const fetchArticlesWithQuery = (sort_by, order, validColumnNamesToSortBy) => {
+const fetchArticlesWithQuery = (
+  sort_by,
+  order,
+  validColumnNamesToSortBy,
+  topic
+) => {
   let SQLString = `SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles`; // Start with a basic string
   const args = [];
 
@@ -109,11 +114,11 @@ const fetchArticlesWithQuery = (sort_by, order, validColumnNamesToSortBy) => {
     order = "desc";
   }
 
-  // // conditionally build up your string and arguments
-  // if (category_id) {
-  //   SQLString += " WHERE category_id = $1"; // dollar syntax only works for VALUES
-  //   args.push(category_id);
-  // }
+  // conditionally build up your string and arguments
+  if (topic) {
+    SQLString += " WHERE topic = $1"; // dollar syntax only works for VALUES
+    args.push(topic);
+  }
 
   if (sort_by) {
     if (validColumnNamesToSortBy.includes(sort_by)) {
@@ -125,7 +130,7 @@ const fetchArticlesWithQuery = (sort_by, order, validColumnNamesToSortBy) => {
     }
   }
 
-  return db.query(SQLString).then(({ rows }) => {
+  return db.query(SQLString, args).then(({ rows }) => {
     return rows;
   });
 };

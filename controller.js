@@ -107,6 +107,7 @@ const getArticlesWithQuery = (request, response, next) => {
 
   const sort_by = queries.sort_by;
   const order = queries.order;
+  const topic = queries.topic;
 
   const validColumnNamesToSortBy = [
     "article_id",
@@ -121,6 +122,8 @@ const getArticlesWithQuery = (request, response, next) => {
 
   const validOrder = ["asc", "desc"];
 
+  const validTopic = ["mitch", "cats"];
+
   if (sort_by && !validColumnNamesToSortBy.includes(sort_by)) {
     return response.status(400).send({ error: `Bad Request` });
   }
@@ -129,7 +132,13 @@ const getArticlesWithQuery = (request, response, next) => {
     return response.status(400).send({ error: `Bad Request` });
   }
 
-  fetchArticlesWithQuery(sort_by, order, validColumnNamesToSortBy)
+  if (topic && !validTopic.includes(topic)) {
+    return response.status(400).send({ error: `Bad Request` });
+  }
+
+  //what if many topics - perhaps: db.query("SELECT DISTINCT topic FROM articles")
+
+  fetchArticlesWithQuery(sort_by, order, validColumnNamesToSortBy, topic)
     .then((articles) => {
       response.status(200).send({ articles });
     })

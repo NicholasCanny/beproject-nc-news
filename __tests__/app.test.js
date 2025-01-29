@@ -387,7 +387,7 @@ describe("GET /api/articles/:article_id", () => {
     });
   });
 
-  describe("GET /api/articles (sorting queries)", () => {
+  describe("GET /api/articles (sorting queries by sort_by and order)", () => {
     test("should return 13 articles ordered by title in ascending order", () => {
       return request(app)
         .get("/api/articles?sort_by=article_id&order=asc")
@@ -432,6 +432,45 @@ describe("GET /api/articles/:article_id", () => {
 
           expect(body).toEqual({
             error: "Route not found",
+          });
+        });
+    });
+  });
+
+  describe("GET /api/articles (sorting queries by topic)", () => {
+    test("should return 1 articles ordered by cats topic in ascending order", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&order=desc&topic=cats")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          expect(body.articles.length).toBe(1);
+
+          expect(body.articles).toBeSortedBy("article_id", {
+            descending: true,
+          });
+        });
+    });
+    test("should return 12 articles ordered by mitch topic in ascending order", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&order=asc&topic=mitch")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          expect(body.articles.length).toBe(12);
+
+          expect(body.articles).toBeSortedBy("article_id", { ascending: true });
+        });
+    });
+    test("should return 400 when invalid topic query", () => {
+      return request(app)
+        .get("/api/articles?sort_by=article_id&order=asc&topic=orangutan")
+        .expect(400)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "Bad Request",
           });
         });
     });
