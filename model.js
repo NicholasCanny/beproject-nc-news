@@ -7,7 +7,23 @@ const fetchTopics = () => {
   });
 };
 
-const fetchArticleByArticleID = (id) => {
+const fetchArticleByArticleID = (id, comment_count) => {
+  if (comment_count === "true") {
+    return Promise.all([
+      db.query(`SELECT * FROM articles WHERE article_id=$1`, [id]),
+      db.query(`SELECT * FROM comments WHERE article_id=$1`, [id]),
+    ]).then(([articleRows, commentRows]) => {
+      const commentCount = commentRows.rows.length;
+      if (articleRows.rowCount === 0) {
+        return Promise.reject({ message: "article not found" });
+      } else {
+        articleRows.rows[0].comment_count = commentCount;
+
+        return articleRows.rows[0];
+      }
+    });
+  }
+
   return db
     .query(`SELECT * FROM articles WHERE article_id=$1`, [id])
     .then(({ rows, rowCount }) => {

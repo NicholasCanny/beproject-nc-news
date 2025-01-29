@@ -1,3 +1,4 @@
+const { commentData } = require("./db/data/test-data");
 const {
   fetchTopics,
   fetchArticleByArticleID,
@@ -22,7 +23,15 @@ const getTopics = (request, response, next) => {
 
 const getArticleByArticleId = (request, response, next) => {
   const { article_id } = request.params;
-  fetchArticleByArticleID(article_id)
+  const { comment_count } = request.query;
+
+  const validcomment_count = ["true", "false"];
+
+  if (comment_count && !validcomment_count.includes(comment_count)) {
+    return response.status(400).send({ error: `Bad Request` });
+  }
+
+  fetchArticleByArticleID(article_id, comment_count)
     .then((article) => {
       response.status(200).send({ article, article_id });
     })
@@ -47,6 +56,7 @@ const getCommentsByArticleId = (request, response, next) => {
     .then((comments) => {
       response.status(200).send({ comments, comment_id });
     })
+    // comment_count: comments.length
     .catch((err) => {
       next(err);
     });
