@@ -475,4 +475,71 @@ describe("GET /api/articles/:article_id", () => {
         });
     });
   });
+  describe("GET /api/articles/:article_id", () => {
+    test("should respond with an article with included comment_count", () => {
+      return request(app)
+        .get("/api/articles/1?comment_count=true")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          const article = body.article;
+          expect(article).toMatchObject({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String), // As this is time stamped, instead checks that created_at is a string
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            comment_count: 11,
+          });
+        });
+    });
+    test("When query = false should respond with the article without comment_count", () => {
+      return request(app)
+        .get("/api/articles/1?comment_count=false")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+          const article = body.article;
+          expect(article).toMatchObject({
+            article_id: 1,
+            title: "Living in the shadow of a great man",
+            topic: "mitch",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String), // As this is time stamped, instead checks that created_at is a string
+            votes: 100,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          });
+        });
+    });
+    test("When query is invalid should respon with 400 - bad request", () => {
+      return request(app)
+        .get("/api/articles/1?comment_count=yes")
+        .expect(400)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "Bad Request",
+          });
+        });
+    });
+    test("Should respond with 404 when query is valid but article doesn't exist", () => {
+      return request(app)
+        .get("/api/articles/999?comment_count=true")
+        .expect(404)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "article not found",
+          });
+        });
+    });
+  });
 });
