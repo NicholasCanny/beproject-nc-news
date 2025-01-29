@@ -303,7 +303,7 @@ describe("GET /api/articles/:article_id", () => {
     });
   });
   describe("DELETE /api/comments/:comment_id", () => {
-    test("should respond with a 204 and delete comment", () => {
+    test("should respond with a 204 and delete comment, then return empty body", () => {
       return request(app)
         .delete("/api/comments/1")
         .expect(204)
