@@ -250,7 +250,7 @@ describe("GET /api/articles/:article_id", () => {
         .expect(201)
         .then((response) => {
           const ArticleChange = response.body.articleChange;
-          console.log(ArticleChange);
+
           expect(ArticleChange).toMatchObject({
             title: "Living in the shadow of a great man",
             topic: "mitch",
@@ -270,7 +270,7 @@ describe("GET /api/articles/:article_id", () => {
         .expect(201)
         .then((response) => {
           const ArticleChange = response.body.articleChange;
-          console.log(ArticleChange);
+
           expect(ArticleChange).toMatchObject({
             title: "Living in the shadow of a great man",
             topic: "mitch",
@@ -299,6 +299,24 @@ describe("GET /api/articles/:article_id", () => {
         .expect(400)
         .then((response) => {
           expect(response.body).toEqual({ error: "Bad Request" });
+        });
+    });
+  });
+  describe("DELETE /api/comments/:comment_id", () => {
+    test("should respond with a 204 and delete comment, then return empty body", () => {
+      return request(app)
+        .delete("/api/comments/1")
+        .expect(204)
+        .then((response) => {
+          expect(response.body).toEqual({});
+        });
+    });
+    test("should respond with a a 404, comment not found", () => {
+      return request(app)
+        .delete("/api/comments/19")
+        .expect(404)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "comment not found" });
         });
     });
   });
