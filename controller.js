@@ -7,6 +7,7 @@ const {
   changeArticle,
   removeCommentById,
   fetchUsers,
+  fetchArticlesWithQuery,
 } = require("./model");
 
 const getTopics = (request, response, next) => {
@@ -101,6 +102,42 @@ const getUsers = (req, res, next) => {
     });
 };
 
+const getArticlesWithQuery = (request, response, next) => {
+  const queries = request.query;
+
+  const sort_by = queries.sort_by;
+  const order = queries.order;
+
+  const validColumnNamesToSortBy = [
+    "article_id",
+    "title",
+    "topic",
+    "author",
+    // "body",
+    "created_at",
+    "votes",
+    "article_img_url",
+  ];
+
+  const validOrder = ["asc", "desc"];
+
+  if (sort_by && !validColumnNamesToSortBy.includes(sort_by)) {
+    return response.status(400).send({ error: `Bad Request` });
+  }
+
+  if (order && !validOrder.includes(order)) {
+    return response.status(400).send({ error: `Bad Request` });
+  }
+
+  fetchArticlesWithQuery(sort_by, order, validColumnNamesToSortBy)
+    .then((articles) => {
+      response.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = {
   getTopics,
   getArticleByArticleId,
@@ -110,4 +147,5 @@ module.exports = {
   updateArticle,
   deleteCommentByID,
   getUsers,
+  getArticlesWithQuery,
 };
