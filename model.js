@@ -103,6 +103,12 @@ const removeCommentById = (comment_id) => {
     });
 };
 
+const fetchUsers = () => {
+  return db.query(`SELECT * FROM users`).then(({ rows }) => {
+    return rows;
+  });
+};
+
 module.exports = {
   fetchTopics,
   fetchArticleByArticleID,
@@ -111,4 +117,5 @@ module.exports = {
   addComment,
   changeArticle,
   removeCommentById,
+  fetchUsers,
 };

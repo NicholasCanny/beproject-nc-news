@@ -311,12 +311,41 @@ describe("GET /api/articles/:article_id", () => {
           expect(response.body).toEqual({});
         });
     });
-    test("should respond with a a 404, comment not found", () => {
+    test("should respond with a 404 when comment_Id doesn't exist, and return message comment not found", () => {
       return request(app)
         .delete("/api/comments/19")
         .expect(404)
         .then((response) => {
           expect(response.body).toEqual({ error: "comment not found" });
+        });
+    });
+  });
+
+  describe("GET /api/users", () => {
+    test("should respond with an array of four users, with three parameters typeof string", () => {
+      return request(app)
+        .get("/api/users")
+        .expect(200)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body.users.length).toBe(4);
+
+          body.users.forEach((user) => {
+            expect(typeof user.username).toBe("string");
+            expect(typeof user.name).toBe("string");
+            expect(typeof user.avatar_url).toBe("string");
+          });
+        });
+    });
+    test("should respond with a 404 error for an incorrect endpoint - user instead of users", () => {
+      return request(app)
+        .get("/api/user")
+        .expect(404)
+        .then((response) => {
+          expect(response.body).toEqual({
+            error: "Route not found",
+          });
         });
     });
   });

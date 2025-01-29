@@ -11,6 +11,7 @@ const {
   postComment,
   updateArticle,
   deleteCommentByID,
+  getUsers,
 } = require("./controller");
 
 app.use(express.json());
@@ -32,6 +33,8 @@ app.post("/api/articles/:article_id/comments", postComment);
 app.patch("/api/articles/:article_id", updateArticle);
 
 app.delete("/api/comments/:comment_id", deleteCommentByID);
+
+app.get("/api/users", getUsers);
 
 // error handling middleware
 
