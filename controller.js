@@ -1,13 +1,13 @@
 const { commentData } = require("./db/data/test-data");
 const {
   fetchTopics,
+  fetchArticlesWithCommentCount,
   fetchArticleByArticleID,
   fetchCommentsByArticleId,
   addComment,
   changeArticle,
   removeCommentById,
   fetchUsers,
-  fetchArticlesWithCommentCount,
 } = require("./model");
 
 const getTopics = (request, response, next) => {
@@ -112,11 +112,11 @@ const getUsers = (req, res, next) => {
 
 module.exports = {
   getTopics,
+  getArticlesWithCommentCount,
   getArticleByArticleId,
   getCommentsByArticleId,
   postComment,
   updateArticle,
   deleteCommentByID,
   getUsers,
-  getArticlesWithCommentCount,
 };

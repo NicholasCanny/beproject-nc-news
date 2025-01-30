@@ -1,21 +1,23 @@
 const express = require("express");
 const app = express();
-const endpoints = require("./endpoints.json");
+
 // imported endpoints.json
+const endpoints = require("./endpoints.json");
 
 const {
   getTopics,
+  getArticlesWithCommentCount,
   getArticleByArticleId,
-  getArticles,
   getCommentsByArticleId,
   postComment,
   updateArticle,
   deleteCommentByID,
   getUsers,
-  getArticlesWithCommentCount,
 } = require("./controller");
 
 app.use(express.json());
+
+// API routes
 
 app.get("/api", (req, res) => {
   res.status(200).send({ endpoints: endpoints });

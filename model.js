@@ -132,11 +132,11 @@ const fetchUsers = () => {
 
 module.exports = {
   fetchTopics,
+  fetchArticlesWithCommentCount,
   fetchArticleByArticleID,
   fetchCommentsByArticleId,
   addComment,
   changeArticle,
   removeCommentById,
   fetchUsers,
-  fetchArticlesWithCommentCount,
 };
