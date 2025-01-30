@@ -23,7 +23,6 @@ const fetchArticleByArticleID = (id, comment_count) => {
       }
     });
   }
-
   return db
     .query(`SELECT * FROM articles WHERE article_id=$1`, [id])
     .then(({ rows, rowCount }) => {
