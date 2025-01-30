@@ -2,13 +2,12 @@ const { commentData } = require("./db/data/test-data");
 const {
   fetchTopics,
   fetchArticleByArticleID,
-  fetchArticles,
   fetchCommentsByArticleId,
   addComment,
   changeArticle,
   removeCommentById,
   fetchUsers,
-  fetchArticlesWithQuery,
+  fetchArticlesWithCommentCount,
 } = require("./model");
 
 const getTopics = (request, response, next) => {
@@ -21,29 +20,28 @@ const getTopics = (request, response, next) => {
     });
 };
 
-const getArticleByArticleId = (request, response, next) => {
-  const { article_id } = request.params;
-  const { comment_count } = request.query;
+const getArticlesWithCommentCount = (request, response, next) => {
+  const queries = request.query;
 
-  const validcomment_count = ["true", "false"];
+  const sort_by = queries.sort_by;
+  const order = queries.order;
+  const topic = queries.topic;
 
-  if (comment_count && !validcomment_count.includes(comment_count)) {
-    return response.status(400).send({ error: `Bad Request` });
-  }
-
-  fetchArticleByArticleID(article_id, comment_count)
-    .then((article) => {
-      response.status(200).send({ article, article_id });
+  fetchArticlesWithCommentCount(sort_by, order, topic)
+    .then((articles) => {
+      response.status(200).send({ articles });
     })
     .catch((err) => {
       next(err);
     });
 };
 
-const getArticles = (request, response, next) => {
-  fetchArticles()
-    .then((articles) => {
-      response.status(200).send({ articles });
+const getArticleByArticleId = (request, response, next) => {
+  const { article_id } = request.params;
+
+  fetchArticleByArticleID(article_id)
+    .then((article) => {
+      response.status(200).send({ article, article_id });
     })
     .catch((err) => {
       next(err);
@@ -56,7 +54,7 @@ const getCommentsByArticleId = (request, response, next) => {
     .then((comments) => {
       response.status(200).send({ comments, comment_id });
     })
-    // comment_count: comments.length
+
     .catch((err) => {
       next(err);
     });
@@ -112,59 +110,13 @@ const getUsers = (req, res, next) => {
     });
 };
 
-const getArticlesWithQuery = (request, response, next) => {
-  const queries = request.query;
-
-  const sort_by = queries.sort_by;
-  const order = queries.order;
-  const topic = queries.topic;
-
-  const validColumnNamesToSortBy = [
-    "article_id",
-    "title",
-    "topic",
-    "author",
-    "body",
-    "created_at",
-    "votes",
-    "article_img_url",
-  ];
-
-  const validOrder = ["asc", "desc"];
-
-  const validTopic = ["mitch", "cats"];
-
-  if (sort_by && !validColumnNamesToSortBy.includes(sort_by)) {
-    return response.status(400).send({ error: `Bad Request` });
-  }
-
-  if (order && !validOrder.includes(order)) {
-    return response.status(400).send({ error: `Bad Request` });
-  }
-
-  if (topic && !validTopic.includes(topic)) {
-    return response.status(400).send({ error: `Bad Request` });
-  }
-
-  //what if many topics - perhaps: db.query("SELECT DISTINCT topic FROM articles")
-
-  fetchArticlesWithQuery(sort_by, order, validColumnNamesToSortBy, topic)
-    .then((articles) => {
-      response.status(200).send({ articles });
-    })
-    .catch((err) => {
-      next(err);
-    });
-};
-
 module.exports = {
   getTopics,
   getArticleByArticleId,
-  getArticles,
   getCommentsByArticleId,
   postComment,
   updateArticle,
   deleteCommentByID,
   getUsers,
-  getArticlesWithQuery,
+  getArticlesWithCommentCount,
 };
