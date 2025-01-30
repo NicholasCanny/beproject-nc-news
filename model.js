@@ -19,36 +19,37 @@ const fetchArticlesWithCommentCount = (sort_by, order, topic) => {
     "article_img_url",
   ];
   const validOrder = ["asc", "desc"];
-  const validTopic = ["mitch", "cats"];
 
-  if (
-    (sort_by && !validColumnNamesToSortBy.includes(sort_by)) ||
-    (order && !validOrder.includes(order)) ||
-    (topic && !validTopic.includes(topic))
-  ) {
-    return Promise.reject({
-      status: 400,
-      message: "bad request",
-    });
-  }
+  return db.query(`SELECT topic FROM articles`).then(({ rows }) => {
+    const validTopics = rows.map((row) => row.topic);
 
-  let SQLString = `SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles`;
-  const args = [];
+    if (
+      (sort_by && !validColumnNamesToSortBy.includes(sort_by)) ||
+      (order && !validOrder.includes(order)) ||
+      (topic && !validTopics.includes(topic))
+    ) {
+      return Promise.reject({
+        status: 400,
+        message: "bad request",
+      });
+    }
 
-  if (topic) {
-    SQLString += " WHERE topic = $1";
-    args.push(topic);
-  }
+    let SQLString = `SELECT article_id, title, topic, author, created_at, votes, article_img_url FROM articles`;
+    const args = [];
 
-  sort_by = sort_by || "created_at";
-  order = order || "desc";
+    if (topic) {
+      SQLString += " WHERE topic = $1";
+      args.push(topic);
+    }
 
-  if (validColumnNamesToSortBy.includes(sort_by)) {
+    sort_by = sort_by || "created_at";
+    order = order || "desc";
+
     SQLString += ` ORDER BY ${sort_by} ${order}`;
-  }
 
-  return db.query(SQLString, args).then(({ rows }) => {
-    return rows;
+    return db.query(SQLString, args).then(({ rows }) => {
+      return rows;
+    });
   });
 };
 
