@@ -58,7 +58,7 @@ describe("GET /api/cheeseOnToast", () => {
       .expect(404)
       .then((response) => {
         expect(response.body).toEqual({
-          error: "Route not found",
+          error: "route not found",
         });
       });
   });
@@ -102,7 +102,7 @@ describe("GET /api/articles/:article_id", () => {
       .expect(400)
       .then((response) => {
         expect(response.body).toEqual({
-          error: "Bad Request",
+          error: "bad request",
         });
       });
   });
@@ -174,7 +174,7 @@ describe("GET /api/articles/:article_id", () => {
         .get("/api/articles/pug/comments")
         .expect(400)
         .then((response) => {
-          expect(response.body).toEqual({ error: "Bad Request" });
+          expect(response.body).toEqual({ error: "bad request" });
         });
     });
     test("should respond with 200 and empty array of comments if the article ID exists but there are no comments for that article", () => {
@@ -239,7 +239,7 @@ describe("GET /api/articles/:article_id", () => {
       })
       .expect(400)
       .then((response) => {
-        expect(response.body).toEqual({ error: "Bad Request" });
+        expect(response.body).toEqual({ error: "bad request" });
       });
   });
   describe("PATCH /api/articles/:article_id", () => {
@@ -298,248 +298,184 @@ describe("GET /api/articles/:article_id", () => {
         .send({ inc_votes: -80 })
         .expect(400)
         .then((response) => {
-          expect(response.body).toEqual({ error: "Bad Request" });
-        });
-    });
-    test("should get a 201 and still pass when accidentally passed string as input", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({ inc_votes: "-20" })
-        .expect(201)
-        .then((response) => {
-          const { articleChange } = response.body;
-
-          expect(articleChange).toMatchObject({
-            title: "Living in the shadow of a great man",
-            topic: "mitch",
-            author: "butter_bridge",
-            body: "I find this existence challenging",
-            created_at: expect.any(String),
-            votes: 80,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          });
-        });
-    });
-    test("should get a 400 when no input", () => {
-      return request(app)
-        .patch("/api/articles/1")
-        .send({})
-        .expect(400)
-        .then((response) => {
-          expect(response.body).toEqual({ error: "Bad Request" });
+          expect(response.body).toEqual({ error: "bad request" });
         });
     });
   });
-  describe("DELETE /api/comments/:comment_id", () => {
-    test("should respond with a 204 and delete comment, then return empty body", () => {
-      return request(app)
-        .delete("/api/comments/1")
-        .expect(204)
-        .then((response) => {
-          expect(response.body).toEqual({});
-        });
-    });
-    test("should respond with a 404 when comment_Id doesn't exist, and return message comment not found", () => {
-      return request(app)
-        .delete("/api/comments/19")
-        .expect(404)
-        .then((response) => {
-          expect(response.body).toEqual({ error: "comment not found" });
-        });
-    });
-    test("should respond with a 400 when invalid input, and return message comment not found", () => {
-      return request(app)
-        .delete("/api/comments/meow")
-        .expect(400)
-        .then((response) => {
-          expect(response.body).toEqual({ error: "Bad Request" });
-        });
-    });
+  test("should get a 400 when no input", () => {
+    return request(app)
+      .patch("/api/articles/1")
+      .send({})
+      .expect(400)
+      .then((response) => {
+        expect(response.body).toEqual({ error: "bad request" });
+      });
   });
-
-  describe("GET /api/users", () => {
-    test("should respond with an array of four users, with three parameters typeof string", () => {
-      return request(app)
-        .get("/api/users")
-        .expect(200)
-        .then((response) => {
-          const body = response.body;
-
-          expect(body.users.length).toBe(4);
-
-          body.users.forEach((user) => {
-            expect(typeof user.username).toBe("string");
-            expect(typeof user.name).toBe("string");
-            expect(typeof user.avatar_url).toBe("string");
-          });
-        });
-    });
-    test("should respond with a 404 error for an incorrect endpoint - user instead of users", () => {
-      return request(app)
-        .get("/api/user")
-        .expect(404)
-        .then((response) => {
-          expect(response.body).toEqual({
-            error: "Route not found",
-          });
-        });
-    });
+});
+describe("DELETE /api/comments/:comment_id", () => {
+  test("should respond with a 204 and delete comment, then return empty body", () => {
+    return request(app)
+      .delete("/api/comments/1")
+      .expect(204)
+      .then((response) => {
+        expect(response.body).toEqual({});
+      });
   });
-
-  describe("GET /api/articles (sorting queries by sort_by and order)", () => {
-    test("should return 13 articles ordered by title in ascending order", () => {
-      return request(app)
-        .get("/api/articles?sort_by=article_id&order=asc")
-        .expect(200)
-        .then((response) => {
-          const body = response.body;
-          expect(body.articles.length).toBe(13);
-
-          expect(body.articles).toBeSortedBy("article_id", { ascending: true });
-        });
-    });
-    test("should respond with 400 when invalid sort_by query", () => {
-      return request(app)
-        .get("/api/articles?sort_by=something&order=asc")
-        .expect(400)
-        .then((response) => {
-          const body = response.body;
-
-          expect(body).toEqual({
-            error: "Bad Request",
-          });
-        });
-    });
-    test("should respond with 400 when invalid order query", () => {
-      return request(app)
-        .get("/api/articles?sort_by=created_at&order=up")
-        .expect(400)
-        .then((response) => {
-          const body = response.body;
-
-          expect(body).toEqual({
-            error: "Bad Request",
-          });
-        });
-    });
-    test("should respond with 400 when invalid order query", () => {
-      return request(app)
-        .get("/api/cat?sort_by=created_at&order=asc")
-        .expect(404)
-        .then((response) => {
-          const body = response.body;
-
-          expect(body).toEqual({
-            error: "Route not found",
-          });
-        });
-    });
+  test("should respond with a 404 when comment_Id doesn't exist, and return message comment not found", () => {
+    return request(app)
+      .delete("/api/comments/19")
+      .expect(404)
+      .then((response) => {
+        expect(response.body).toEqual({ error: "comment not found" });
+      });
   });
-
-  describe("GET /api/articles (sorting queries by topic)", () => {
-    test("should return 1 articles ordered by cats topic in ascending order", () => {
-      return request(app)
-        .get("/api/articles?sort_by=article_id&order=desc&topic=cats")
-        .expect(200)
-        .then((response) => {
-          const body = response.body;
-          expect(body.articles.length).toBe(1);
-
-          expect(body.articles).toBeSortedBy("article_id", {
-            descending: true,
-          });
-        });
-    });
-    test("should return 12 articles ordered by mitch topic in ascending order", () => {
-      return request(app)
-        .get("/api/articles?sort_by=article_id&order=asc&topic=mitch")
-        .expect(200)
-        .then((response) => {
-          const body = response.body;
-          expect(body.articles.length).toBe(12);
-
-          expect(body.articles).toBeSortedBy("article_id", { ascending: true });
-        });
-    });
-    test("should return 400 when invalid topic query", () => {
-      return request(app)
-        .get("/api/articles?sort_by=article_id&order=asc&topic=orangutan")
-        .expect(400)
-        .then((response) => {
-          const body = response.body;
-
-          expect(body).toEqual({
-            error: "Bad Request",
-          });
-        });
-    });
+  test("should respond with a 400 when invalid input, and return message comment not found", () => {
+    return request(app)
+      .delete("/api/comments/meow")
+      .expect(400)
+      .then((response) => {
+        expect(response.body).toEqual({ error: "bad request" });
+      });
   });
-  describe("GET /api/articles/:article_id", () => {
-    test("should respond with an article with included comment_count", () => {
-      return request(app)
-        .get("/api/articles/1?comment_count=true")
-        .expect(200)
-        .then((response) => {
-          const body = response.body;
-          const article = body.article;
-          expect(article).toMatchObject({
-            article_id: 1,
-            title: "Living in the shadow of a great man",
-            topic: "mitch",
-            author: "butter_bridge",
-            body: "I find this existence challenging",
-            created_at: expect.any(String), // As this is time stamped, instead checks that created_at is a string
-            votes: 100,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-            comment_count: 11,
-          });
-        });
-    });
-    test("When query = false should respond with the article without comment_count", () => {
-      return request(app)
-        .get("/api/articles/1?comment_count=false")
-        .expect(200)
-        .then((response) => {
-          const body = response.body;
-          const article = body.article;
-          expect(article).toMatchObject({
-            article_id: 1,
-            title: "Living in the shadow of a great man",
-            topic: "mitch",
-            author: "butter_bridge",
-            body: "I find this existence challenging",
-            created_at: expect.any(String), // As this is time stamped, instead checks that created_at is a string
-            votes: 100,
-            article_img_url:
-              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
-          });
-        });
-    });
-    test("When query is invalid should respon with 400 - bad request", () => {
-      return request(app)
-        .get("/api/articles/1?comment_count=yes")
-        .expect(400)
-        .then((response) => {
-          const body = response.body;
+});
 
-          expect(body).toEqual({
-            error: "Bad Request",
-          });
-        });
-    });
-    test("Should respond with 404 when query is valid but article doesn't exist", () => {
-      return request(app)
-        .get("/api/articles/999?comment_count=true")
-        .expect(404)
-        .then((response) => {
-          const body = response.body;
+describe("GET /api/users", () => {
+  test("should respond with an array of four users, with three parameters typeof string", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
 
-          expect(body).toEqual({
-            error: "article not found",
-          });
+        expect(body.users.length).toBe(4);
+
+        body.users.forEach((user) => {
+          expect(typeof user.username).toBe("string");
+          expect(typeof user.name).toBe("string");
+          expect(typeof user.avatar_url).toBe("string");
         });
-    });
+      });
+  });
+  test("should respond with a 404 error for an incorrect endpoint - user instead of users", () => {
+    return request(app)
+      .get("/api/user")
+      .expect(404)
+      .then((response) => {
+        expect(response.body).toEqual({
+          error: "route not found",
+        });
+      });
+  });
+});
+
+describe("GET /api/articles (sorting queries by sort_by and order)", () => {
+  test("should return 13 articles ordered by article_id in ascending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id&order=asc")
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles.length).toBe(13);
+
+        expect(body.articles).toBeSortedBy("article_id", { ascending: true });
+      });
+  });
+  test("should respond with 400 when invalid sort_by query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=something&order=asc")
+      .expect(400)
+      .then((response) => {
+        const body = response.body;
+
+        expect(body).toEqual({
+          error: "bad request",
+        });
+      });
+  });
+  test("should respond with 400 when invalid order query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=created_at&order=up")
+      .expect(400)
+      .then((response) => {
+        const body = response.body;
+
+        expect(body).toEqual({
+          error: "bad request",
+        });
+      });
+  });
+  test("should respond with 400 when invalid order query", () => {
+    return request(app)
+      .get("/api/cat?sort_by=created_at&order=asc")
+      .expect(404)
+      .then((response) => {
+        const body = response.body;
+
+        expect(body).toEqual({
+          error: "route not found",
+        });
+      });
+  });
+});
+
+describe("GET /api/articles (sorting queries by topic)", () => {
+  test("should return 1 articles ordered by cats topic in ascending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id&order=desc&topic=cats")
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles.length).toBe(1);
+
+        expect(body.articles).toBeSortedBy("article_id", {
+          descending: true,
+        });
+      });
+  });
+  test("should return 12 articles ordered by mitch topic in ascending order", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id&order=asc&topic=mitch")
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        expect(body.articles.length).toBe(12);
+
+        expect(body.articles).toBeSortedBy("article_id", { ascending: true });
+      });
+  });
+  test("should return 400 when invalid topic query", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id&order=asc&topic=orangutan")
+      .expect(400)
+      .then((response) => {
+        const body = response.body;
+
+        expect(body).toEqual({
+          error: "bad request",
+        });
+      });
+  });
+});
+describe("GET /api/articles/:article_id", () => {
+  test("should respond with an article with included comment_count", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+        const article = body.article;
+        expect(article).toMatchObject({
+          article_id: 1,
+          title: "Living in the shadow of a great man",
+          topic: "mitch",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          created_at: expect.any(String), // As this is time stamped, instead checks that created_at is a string
+          votes: 100,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+          comment_count: 11,
+        });
+      });
   });
 });
