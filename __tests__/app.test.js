@@ -165,7 +165,7 @@ describe("GET /api/articles/:article_id", () => {
         .get("/api/articles/100/comments")
         .expect(404)
         .then((response) => {
-          expect(response.body).toEqual({ error: "article ID not found" });
+          expect(response.body).toEqual({ error: "article_id not found" });
         });
     });
 
@@ -185,19 +185,22 @@ describe("GET /api/articles/:article_id", () => {
           expect(response.body).toEqual({ comments: [] });
         });
     });
+
     test("should resolve if article Id exists ", () => {
-      return expect(checkCategoryExists(1)).resolves.toBe("article exists");
+      return expect(checkCategoryExists("articles", 1)).resolves.toBe(
+        "article exists"
+      );
     });
   });
   test("should reject if category ID doesn't exist", () => {
-    return expect(checkCategoryExists(100)).rejects.toMatchObject({
+    return expect(checkCategoryExists("articles", 100)).rejects.toMatchObject({
       status: 404,
-      message: "article ID not found",
+      message: "article_id not found",
     });
   });
 
   describe("POST /api/articles/:article_id/comments", () => {
-    test("should respond with a posted comment to specific article ID", () => {
+    test("should respond with 201 and return the posted comment for a valid article ID", () => {
       return request(app)
         .post("/api/articles/1/comments")
         .send({
@@ -217,7 +220,7 @@ describe("GET /api/articles/:article_id", () => {
           });
         });
     });
-    test("should respond with a posted comment to specific article ID", () => {
+    test("should respond with a 404 when article ID doesn't exist", () => {
       return request(app)
         .post("/api/articles/100/comments")
         .send({
@@ -226,11 +229,11 @@ describe("GET /api/articles/:article_id", () => {
         })
         .expect(404)
         .then((response) => {
-          expect(response.body).toEqual({ error: "article ID not found" });
+          expect(response.body).toEqual({ error: "article_id not found" });
         });
     });
   });
-  test("should respond with a posted comment to specific article ID", () => {
+  test("should respond with a 400 when passed invalid input", () => {
     return request(app)
       .post("/api/articles/pug/comments")
       .send({
@@ -240,6 +243,20 @@ describe("GET /api/articles/:article_id", () => {
       .expect(400)
       .then((response) => {
         expect(response.body).toEqual({ error: "bad request" });
+      });
+  });
+  test("should respond with 400 if the request body is missing the required fields", () => {
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send({
+        username: "lurker",
+        // Missing body field
+      })
+      .expect(400)
+      .then((response) => {
+        expect(response.body).toEqual({
+          error: "bad request",
+        });
       });
   });
   describe("PATCH /api/articles/:article_id", () => {
@@ -289,7 +306,7 @@ describe("GET /api/articles/:article_id", () => {
         .send({ inc_votes: -80 })
         .expect(404)
         .then((response) => {
-          expect(response.body).toEqual({ error: "article ID not found" });
+          expect(response.body).toEqual({ error: "article_id not found" });
         });
     });
     test("should get a 400 when passed invalid input", () => {
@@ -455,6 +472,16 @@ describe("GET /api/articles (sorting queries by topic)", () => {
         });
       });
   });
+  test("should return 200 and empty array when a valid topic has no articles", () => {
+    return request(app)
+      .get("/api/articles?sort_by=article_id&order=asc&topic=paper")
+      .expect(200)
+      .then((response) => {
+        const body = response.body;
+
+        expect(body).toEqual({ articles: [] });
+      });
+  });
 });
 describe("GET /api/articles/:article_id", () => {
   test("should respond with an article with included comment_count", () => {
@@ -462,8 +489,7 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/1")
       .expect(200)
       .then((response) => {
-        const body = response.body;
-        const article = body.article;
+        const article = response.body.article;
         expect(article).toMatchObject({
           article_id: 1,
           title: "Living in the shadow of a great man",
@@ -477,5 +503,89 @@ describe("GET /api/articles/:article_id", () => {
           comment_count: 11,
         });
       });
+  });
+
+  describe("GET /api/users/:username", () => {
+    test("should respond with a specific users information", () => {
+      return request(app)
+        .get("/api/users/rogersop")
+        .expect(200)
+        .then((response) => {
+          const user = response.body.user;
+
+          expect(user).toMatchObject({
+            username: "rogersop",
+            name: "paul",
+            avatar_url:
+              "https://avatars2.githubusercontent.com/u/24394918?s=400&v=4",
+          });
+        });
+    });
+    test("should respond with a 404 when user not found", () => {
+      return request(app)
+        .get("/api/users/lion")
+        .expect(404)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "user not found",
+          });
+        });
+    });
+  });
+  describe("PATCH /api/articles/:article_id", () => {
+    test("should respond with a changed article selected by article ID", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({ inc_votes: 1 })
+        .expect(201)
+        .then((response) => {
+          const commentChange = response.body.commentChange;
+
+          expect(commentChange).toMatchObject({
+            body: "Oh, I've got compassion running out of my nose, pal! I'm the Sultan of Sentiment!",
+            votes: 17,
+            author: "butter_bridge",
+            article_id: 9,
+            created_at: expect.any(String),
+          });
+        });
+    });
+    test("should respond with a 404 if comment ID does not exist", () => {
+      return request(app)
+        .patch("/api/comments/400")
+        .send({ inc_votes: 1 })
+        .expect(404)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "comment_id not found",
+          });
+        });
+    });
+    test("should respond with a 400 when passed invalid input", () => {
+      return request(app)
+        .patch("/api/comments/orange")
+        .send({ inc_votes: 1 })
+        .expect(400)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "bad request",
+          });
+        });
+    });
+    test("should get a 400 when no input for inc_votes", () => {
+      return request(app)
+        .patch("/api/comments/1")
+        .send({})
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "bad request" });
+        });
+    });
   });
 });

@@ -8,6 +8,8 @@ const {
   changeArticle,
   removeCommentById,
   fetchUsers,
+  fetchUserByUserName,
+  changeComment,
 } = require("./model");
 
 const getTopics = (request, response, next) => {
@@ -110,6 +112,34 @@ const getUsers = (req, res, next) => {
     });
 };
 
+const getUserByUserName = (request, response, next) => {
+  const { username } = request.params;
+
+  fetchUserByUserName(username)
+    .then((user) => {
+      response.status(200).send({ user: user });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const updateComment = (request, response, next) => {
+  const commentChange = request.body;
+  const newVote = commentChange.inc_votes;
+
+  const { comment_id } = request.params;
+  console.log(request.params);
+
+  changeComment(newVote, comment_id)
+    .then((commentChange) => {
+      response.status(201).send({ commentChange });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = {
   getTopics,
   getArticlesWithCommentCount,
@@ -119,4 +149,6 @@ module.exports = {
   updateArticle,
   deleteCommentByID,
   getUsers,
+  getUserByUserName,
+  updateComment,
 };

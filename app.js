@@ -1,43 +1,18 @@
+// server.js
 const express = require("express");
 const app = express();
-
-// imported endpoints.json
+const apiRouter = require("./api-router");
 const endpoints = require("./endpoints.json");
-
-const {
-  getTopics,
-  getArticlesWithCommentCount,
-  getArticleByArticleId,
-  getCommentsByArticleId,
-  postComment,
-  updateArticle,
-  deleteCommentByID,
-  getUsers,
-} = require("./controller");
 
 app.use(express.json());
 
-// API routes
-
+// Root API route
 app.get("/api", (req, res) => {
   res.status(200).send({ endpoints: endpoints });
 });
 
-app.get("/api/topics", getTopics);
-
-app.get("/api/articles/:article_id", getArticleByArticleId);
-
-app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
-
-app.post("/api/articles/:article_id/comments", postComment);
-
-app.patch("/api/articles/:article_id", updateArticle);
-
-app.delete("/api/comments/:comment_id", deleteCommentByID);
-
-app.get("/api/users", getUsers);
-
-app.get("/api/articles", getArticlesWithCommentCount);
+// Use API Router
+app.use("/api", apiRouter);
 
 // error handling middleware
 
