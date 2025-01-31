@@ -588,4 +588,108 @@ describe("GET /api/articles/:article_id", () => {
         });
     });
   });
+  describe("POST /api/articles", () => {
+    test("should respond with 201 and return the posted comment for a valid article ID", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          title: "Living in the shadow of a bad man",
+          topic: "cats",
+          author: "icellusedkars",
+          body: "I find this existence challenging",
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        })
+        .expect(201)
+        .then((response) => {
+          const postedArticle = response.body.article;
+
+          expect(postedArticle).toMatchObject({
+            article_id: 14,
+            title: "Living in the shadow of a bad man",
+            topic: "cats",
+            author: "icellusedkars",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 0,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            comment_count: 13,
+          });
+        });
+    });
+    test("should respond with 201 and return the posted comment for a valid article ID", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          title: "Living in the shadow of a bad man",
+          topic: "cats",
+          author: "butter_bridge",
+          body: "I find this existence challenging",
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        })
+        .expect(201)
+        .then((response) => {
+          const postedArticle = response.body.article;
+
+          expect(postedArticle).toMatchObject({
+            article_id: 14,
+            title: "Living in the shadow of a bad man",
+            topic: "cats",
+            author: "butter_bridge",
+            body: "I find this existence challenging",
+            created_at: expect.any(String),
+            votes: 0,
+            article_img_url:
+              "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+            comment_count: 5,
+          });
+        });
+    });
+    test("should respond with 400 if author is not a username in users table", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          title: "Living in the shadow of a bad man",
+          topic: "cats",
+          author: "dogs",
+          body: "I find this existence challenging",
+          created_at: 1594329060000,
+          votes: 100,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        })
+        .expect(400)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "author not found",
+          });
+        });
+    });
+    test("should respond with 404 if author is not a username in users table", () => {
+      return request(app)
+        .post("/api/articles")
+        .send({
+          title: "Living in the shadow of a bad man",
+          topic: "cats",
+          author: "dogs",
+          body: "I find this existence challenging",
+          created_at: 1594329060000,
+          votes: 100,
+          article_img_url:
+            "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700",
+        })
+        .expect(400)
+        .then((response) => {
+          const body = response.body;
+
+          expect(body).toEqual({
+            error: "author not found",
+          });
+        });
+    });
+  });
 });

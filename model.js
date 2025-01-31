@@ -160,6 +160,48 @@ const changeComment = (newVote, id) => {
   });
 };
 
+const addArticle = (newArticle) => {
+  let { author, title, body, topic, article_img_url } = newArticle;
+
+  return db.query(`SELECT username FROM users`).then(({ rows }) => {
+    const validAuthors = rows.map((row) => row.username);
+
+    if (!validAuthors.includes(author)) {
+      return Promise.reject({
+        status: 400,
+        message: "author not found",
+      });
+    }
+
+    article_img_url =
+      article_img_url ||
+      "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700";
+
+    return db
+      .query(
+        `INSERT INTO articles (author, title, body, topic, article_img_url) 
+           VALUES ($1, $2, $3, $4, $5) 
+           RETURNING *`,
+        [author, title, body, topic, article_img_url]
+      )
+      .then(({ rows: articleRows }) => {
+        if (articleRows.length === 0) {
+          return Promise.reject({ status: 404, message: "article not found" });
+        }
+
+        const article = articleRows[0];
+
+        return db
+          .query(`SELECT COUNT(*) FROM comments WHERE author = $1`, [author])
+          .then(({ rows }) => {
+            article.comment_count = Number(rows[0].count);
+
+            return article;
+          });
+      });
+  });
+};
+
 module.exports = {
   fetchTopics,
   fetchArticlesWithCommentCount,
@@ -171,4 +213,5 @@ module.exports = {
   fetchUsers,
   fetchUserByUserName,
   changeComment,
+  addArticle,
 };
