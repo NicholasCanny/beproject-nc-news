@@ -11,6 +11,7 @@ const {
   fetchUserByUserName,
   changeComment,
   addArticle,
+  removeArticleById,
 } = require("./model");
 
 const getTopics = (request, response, next) => {
@@ -154,6 +155,18 @@ const postArticle = (request, response, next) => {
     });
 };
 
+const deleteArticleByID = (req, res, next) => {
+  const { article_id } = req.params;
+
+  removeArticleById(article_id)
+    .then(() => {
+      res.status(204).send();
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = {
   getTopics,
   getArticlesWithCommentCount,
@@ -166,4 +179,5 @@ module.exports = {
   getUserByUserName,
   updateComment,
   postArticle,
+  deleteArticleByID,
 };

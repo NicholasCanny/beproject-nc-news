@@ -692,4 +692,43 @@ describe("GET /api/articles/:article_id", () => {
         });
     });
   });
+  describe("DELETE /api/articles/:article_id", () => {
+    test("should respond with a 204 and delete article along with its linked comments, returning an empty body", () => {
+      return request(app)
+        .delete("/api/articles/1")
+        .expect(204)
+        .then((response) => {
+          expect(response.body).toEqual({});
+        });
+    });
+
+    test("should respond with a 404 when article does not exist, and return message 'article not found'", () => {
+      return request(app)
+        .delete("/api/articles/999")
+        .expect(404)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "article not found" });
+        });
+    });
+
+    test("should respond with a 400 when invalid input is given, and return message 'bad request'", () => {
+      return request(app)
+        .delete("/api/articles/meow")
+        .expect(400)
+        .then((response) => {
+          expect(response.body).toEqual({ error: "bad request" });
+        });
+    });
+    test("should respond with a 204 and delete the article along with its linked comments, returning an empty body", () => {
+      return request(app)
+        .delete("/api/articles/1")
+        .expect(204)
+        .then(() => {
+          return db.query("SELECT * FROM comments WHERE article_id = 1");
+        })
+        .then(({ rows: commentRows }) => {
+          expect(commentRows.length).toBe(0);
+        });
+    });
+  });
 });

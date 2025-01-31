@@ -13,6 +13,7 @@ const {
   deleteCommentByID,
   updateComment,
   postArticle,
+  deleteArticleByID,
 } = require("./controller");
 
 apiRouter.get("/topics", getTopics);
@@ -24,6 +25,7 @@ apiRouter.post("/articles", postArticle);
 apiRouter.patch("/articles/:article_id", updateArticle);
 apiRouter.patch("/comments/:comment_id", updateComment);
 apiRouter.delete("/comments/:comment_id", deleteCommentByID);
+apiRouter.delete("/articles/:article_id", deleteArticleByID);
 apiRouter.use("/users", usersRouter);
 
 module.exports = apiRouter;

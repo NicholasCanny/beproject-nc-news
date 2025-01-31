@@ -202,6 +202,21 @@ const addArticle = (newArticle) => {
   });
 };
 
+const removeArticleById = (article_id) => {
+  return Promise.all([
+    db.query("DELETE FROM comments WHERE article_id = $1", [article_id]), // Delete comments first
+    db.query("DELETE FROM articles WHERE article_id = $1", [article_id]), // Then delete the article
+  ]).then(([commentResult, articleResult]) => {
+    if (articleResult.rowCount === 0) {
+      return Promise.reject({
+        status: 404,
+        message: "article not found",
+      });
+    }
+    return;
+  });
+};
+
 module.exports = {
   fetchTopics,
   fetchArticlesWithCommentCount,
@@ -214,4 +229,5 @@ module.exports = {
   fetchUserByUserName,
   changeComment,
   addArticle,
+  removeArticleById,
 };
