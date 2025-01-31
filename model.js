@@ -1,5 +1,8 @@
 const db = require("./db/connection");
-const { checkCategoryExists } = require("./db/seeds/utils");
+const {
+  checkCategoryExists,
+  checkCategoryExists2,
+} = require("./db/seeds/utils");
 
 const fetchTopics = () => {
   return db.query(`SELECT * FROM topics`).then(({ rows }) => {
@@ -20,8 +23,8 @@ const fetchArticlesWithCommentCount = (sort_by, order, topic) => {
   ];
   const validOrder = ["asc", "desc"];
 
-  return db.query(`SELECT topic FROM articles`).then(({ rows }) => {
-    const validTopics = rows.map((row) => row.topic);
+  return db.query(`SELECT slug FROM topics`).then(({ rows }) => {
+    const validTopics = rows.map((row) => row.slug);
 
     if (
       (sort_by && !validColumnNamesToSortBy.includes(sort_by)) ||
@@ -70,7 +73,7 @@ const fetchArticleByArticleID = (id) => {
 };
 
 const fetchCommentsByArticleId = (id) => {
-  return checkCategoryExists(id).then(() => {
+  return checkCategoryExists("articles", id).then(() => {
     return db
       .query(
         `SELECT * FROM comments WHERE article_id=$1 ORDER BY created_at DESC`,
@@ -85,7 +88,7 @@ const fetchCommentsByArticleId = (id) => {
 const addComment = (newComment, id) => {
   const { body, username } = newComment;
 
-  return checkCategoryExists(id).then(() => {
+  return checkCategoryExists("articles", id).then(() => {
     return db
       .query(
         `INSERT INTO comments (body, author, article_id) VALUES ($1, $2, $3) RETURNING *`,
@@ -98,7 +101,7 @@ const addComment = (newComment, id) => {
 };
 
 const changeArticle = (newVote, id) => {
-  return checkCategoryExists(id).then(() => {
+  return checkCategoryExists("articles", id).then(() => {
     return db
       .query(
         `UPDATE articles SET votes = votes + $1 WHERE article_id = $2  RETURNING *`,
@@ -130,6 +133,33 @@ const fetchUsers = () => {
   });
 };
 
+const fetchUserByUserName = (username) => {
+  return db
+    .query(`SELECT * FROM users WHERE username=$1`, [username])
+    .then(({ rows, rowCount }) => {
+      if (rowCount === 0) {
+        return Promise.reject({
+          status: 404,
+          message: "user not found",
+        });
+      }
+      return rows[0];
+    });
+};
+
+const changeComment = (newVote, id) => {
+  return checkCategoryExists("comments", id).then(() => {
+    return db
+      .query(
+        `UPDATE comments SET votes = votes + $1 WHERE comment_id = $2  RETURNING *`,
+        [newVote, id]
+      )
+      .then(({ rows }) => {
+        return rows[0];
+      });
+  });
+};
+
 module.exports = {
   fetchTopics,
   fetchArticlesWithCommentCount,
@@ -139,4 +169,6 @@ module.exports = {
   changeArticle,
   removeCommentById,
   fetchUsers,
+  fetchUserByUserName,
+  changeComment,
 };
