@@ -10,6 +10,7 @@ const {
   fetchUsers,
   fetchUserByUserName,
   changeComment,
+  addArticle,
 } = require("./model");
 
 const getTopics = (request, response, next) => {
@@ -129,11 +130,24 @@ const updateComment = (request, response, next) => {
   const newVote = commentChange.inc_votes;
 
   const { comment_id } = request.params;
-  console.log(request.params);
 
   changeComment(newVote, comment_id)
     .then((commentChange) => {
       response.status(201).send({ commentChange });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const postArticle = (request, response, next) => {
+  const newArticle = request.body;
+
+  const { article_id } = request.params;
+
+  addArticle(newArticle)
+    .then((newArticle) => {
+      response.status(201).send({ article: newArticle });
     })
     .catch((err) => {
       next(err);
@@ -151,4 +165,5 @@ module.exports = {
   getUsers,
   getUserByUserName,
   updateComment,
+  postArticle,
 };
